@@ -43,10 +43,12 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
     for n in old_nodes:
         news = n.text.split(delimiter)
+        news = list(filter(None, news))
         if len(news) < 3:
             new_nodes.append(n)
             continue
         if len(news) > 3:
+            print(news)
             raise Exception("Weird number of split")
         new_nodes.append(TextNode(news[0], n.text_type))
         new_nodes.append(TextNode(news[1], text_type))

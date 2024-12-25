@@ -1,8 +1,8 @@
 import unittest
 
-from util import textnode_to_htmlnode, text_to_textnodes
-from util import extract_markdown_images, extract_markdown_links
-from util import split_nodes_delimiter, split_nodes_image, split_nodes_link
+from node_util import textnode_to_htmlnode, text_to_textnodes
+from node_util import extract_markdown_images, extract_markdown_links
+from node_util import split_nodes_delimiter, split_nodes_image, split_nodes_link
 from textnode import TextNode, TextType
 from leafnode import LeafNode
 
@@ -184,6 +184,7 @@ class TestConvert(unittest.TestCase):
         ]
 
         self.assertEqual(expected, text_to_textnodes(text))
+
 
 
 if __name__ == "__main__":
