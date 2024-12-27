@@ -1,6 +1,6 @@
 import os, shutil
 
-from generate_page import generate_page
+from generate_page import generate_pages_recursive
 
 
 def copy_src_to_dst(src, dst):
@@ -44,7 +44,7 @@ def copy_src_to_dst(src, dst):
 
 def main():
     copy_src_to_dst("./static/", "./public/")
-    generate_page("./content/index.md", "template.html", "./public/index.html")
+    generate_pages_recursive("./content/index.md", "template.html", "./public/index.html")
 
 
 main()
