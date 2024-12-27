@@ -123,7 +123,7 @@ class TestConvert(unittest.TestCase):
         self.assertEqual([], extract_markdown_images(text))
 
     def test_extract_markdown_links(self):
-        text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        text = "This is text *with* a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
         self.assertEqual([("to boot dev", "https://www.boot.dev"), ("to youtube",
                          "https://www.youtube.com/@bootdotdev")], extract_markdown_links(text))
 

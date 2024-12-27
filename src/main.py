@@ -1,5 +1,8 @@
 import os, shutil
 
+from generate_page import generate_page
+
+
 def copy_src_to_dst(src, dst):
     if len(src) == 0 or len(dst) == 0:
         raise Exception("src or dst copy parameters invalid")
@@ -41,6 +44,7 @@ def copy_src_to_dst(src, dst):
 
 def main():
     copy_src_to_dst("./static/", "./public/")
+    generate_page("./content/index.md", "template.html", "./public/index.html")
 
 
 main()

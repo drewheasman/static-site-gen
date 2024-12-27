@@ -11,14 +11,34 @@ This is a paragraph of text. It has some **bold** and *italic* words inside of i
 
 * This is the first list item in a list block
 * This is a list item
-* This is another list item"""
+* This is another list item
+
+1. Here
+2. is
+3. an
+4. ordered
+5. list
+
+```
+Ma code
+```
+
+"""
 
         expected = [
-                "# This is a heading",
-                "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
-                """* This is the first list item in a list block
+            "# This is a heading",
+            "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+            """* This is the first list item in a list block
 * This is a list item
 * This is another list item""",
+            """1. Here
+2. is
+3. an
+4. ordered
+5. list""",
+            """```
+Ma code
+```"""
         ]
 
         self.assertEqual(expected, markdown_to_blocks(markdown_string))
@@ -75,13 +95,21 @@ This is a paragraph of text. It has some **bold** and *italic* words inside of i
 * This is a list item
 * This is another list item
 
-1. This is the first item in an ordered list block
-2. This is the second item in an ordered list block
-3. This is the third item in an ordered list block
+1. Here
+2. is
+3. an
+4. ordered
+5. list
+
+```
+Ma code
+```
+
+> quote
 
 """
 
-        expected_html = """<div><h1>This is a heading</h1><p>This is a paragraph of text. It has some <b>bold</b> and <i>italic</i> words inside of it.</p><ul><li>This is the first list item in a list block</li><li>This is a list item</li><li>This is another list item</li></ul><ol><li>This is the first item in an ordered list block</li></ol><ol><li>This is the second item in an ordered list block</li></ol><ol><li>This is the third item in an ordered list block</li></ol></div>"""
+        expected_html = """<div><h1>This is a heading</h1><p>This is a paragraph of text. It has some <b>bold</b> and <i>italic</i> words inside of it.</p><ul><li>This is the first list item in a list block</li><li>This is a list item</li><li>This is another list item</li></ul><ol><li>Here</li><li>is</li><li>an</li><li>ordered</li><li>list</li></ol><code>Ma code</code><blockquote>quote</blockquote></div>"""
 
         html_nodes = markdown_to_html_node(markdown_string)
 

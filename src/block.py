@@ -6,6 +6,12 @@ from node_util import text_to_textnodes, textnode_to_htmlnode
 from parentnode import ParentNode
 
 
+heading_regex = "^#+ "
+unordered_list_regex = "^[*-] "
+quote_regex = "^[>] "
+ordered_list_regex = "^\\d+\\. "
+code_identifier = "```"
+
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
     HEADING = "heading"
@@ -15,22 +21,42 @@ class BlockType(Enum):
     ORDERED_LIST = "ordered list"
 
 
+def append_line_to_last_list_item(lst, line):
+    lst.append(f"{lst.pop()}\n{line}")
+
 def markdown_to_blocks(markdown):
     blocks = []
-    prev_line = ""
+    prev_block_type = None
     for line in markdown.split("\n"):
         line = line.strip()
 
-        if len(line) > 0:
-            match line[0]:
-                case "*":
-                    if prev_line.startswith("*"):
-                        blocks.append(f"{blocks.pop()}\n{line}")
-                    else:
-                        blocks.append(line)
-                case _:
-                    blocks.append(line)
-        prev_line = line
+        if len(line) == 0:
+            prev_block_type = None
+            continue
+
+        if re.match(code_identifier, line) or prev_block_type == BlockType.CODE:
+            if prev_block_type == BlockType.CODE:
+                append_line_to_last_list_item(blocks, line)
+                if re.match(code_identifier, line):
+                    prev_block_type = None
+            else:
+                prev_block_type = BlockType.CODE
+                blocks.append(line)
+            continue
+
+        # Assume headings and paragraphs are single line
+        continue_block = False
+        if (re.match(unordered_list_regex, line) and prev_block_type == BlockType.UNORDERED_LIST) or \
+            (re.match(ordered_list_regex, line) and prev_block_type == BlockType.ORDERED_LIST) or \
+            (re.match(quote_regex, line) and prev_block_type == BlockType.QUOTE):
+            continue_block = True
+        else:
+            blocks.append(line)
+
+        if continue_block:
+            append_line_to_last_list_item(blocks, line)
+
+        prev_block_type = block_to_block_type(blocks[-1])
 
     return blocks
 
@@ -42,19 +68,19 @@ def lines_match(lines, regex):
 
 
 def block_to_block_type(markdown_block):
-    if markdown_block.startswith("# "):
+    if re.match(heading_regex, markdown_block):
         return BlockType.HEADING
 
-    if markdown_block.startswith("```") and markdown_block.endswith("```"):
+    if markdown_block.startswith(code_identifier) and markdown_block.endswith(code_identifier):
         return BlockType.CODE
 
-    if lines_match(markdown_block, "^[>] "):
+    if re.match(quote_regex, markdown_block):
         return BlockType.QUOTE
 
-    if lines_match(markdown_block, "^[*-] "):
+    if re.match(unordered_list_regex, markdown_block):
         return BlockType.UNORDERED_LIST
 
-    if lines_match(markdown_block, "^\\d+\\. "):
+    if re.match(ordered_list_regex, markdown_block):
         return BlockType.ORDERED_LIST
 
     return BlockType.PARAGRAPH
@@ -66,24 +92,25 @@ def markdown_to_html_node(markdown):
     for block in markdown_blocks:
         match block_to_block_type(block):
             case BlockType.HEADING:
-                node = LeafNode("h1", block[2:])
+                count = block.count("#")
+                node = LeafNode(f"h{count}", block[2:])
                 nodes.append(node)
             case BlockType.PARAGRAPH:
                 leaves = map(textnode_to_htmlnode, text_to_textnodes(block))
                 nodes.append(ParentNode("p", leaves))
-            # Have to add code identification to markdown_to_blocks
-            # case BlockType.CODE:
-            #     code = LeafNode("code", "\n".join(block.split("\n")[1:-1]))
-            #     print(code)
-            #     nodes.append(code)
+            case BlockType.CODE:
+                code = LeafNode("code", "\n".join(block.split("\n")[1:-1]))
+                nodes.append(code)
             case BlockType.QUOTE:
-                node = LeafNode("q", block)
+                node = LeafNode("blockquote", block[2:])
                 nodes.append(node)
             case BlockType.UNORDERED_LIST:
-                node = ParentNode("ul", map(lambda l: LeafNode("li", l[2:]), block.split("\n")))
-                nodes.append(node)
+                node = "".join(map(lambda l: LeafNode("li", l[2:]).to_html(), block.split("\n")))
+                node = map(textnode_to_htmlnode, text_to_textnodes(node))
+                nodes.append(ParentNode("ul", node))
             case BlockType.ORDERED_LIST:
-                node = ParentNode("ol", map(lambda l: LeafNode("li", re.sub("^\\d+\\. ", "", l)), block.split("\n")))
-                nodes.append(node)
+                node = "".join(map(lambda l: LeafNode("li", re.sub(ordered_list_regex, "", l)).to_html(), block.split("\n")))
+                node = map(textnode_to_htmlnode, text_to_textnodes(node))
+                nodes.append(ParentNode("ol", node))
 
     return ParentNode("div", nodes)
