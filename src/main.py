@@ -10,7 +10,7 @@ def copy_src_to_dst(src, dst):
     src = os.path.abspath(src)
     dst = os.path.abspath(dst)
 
-    print(f"Copying {src} to {dst}")
+    # print(f"Copying {src} to {dst}")
 
     if not os.path.exists(src):
         raise Exception("src doesn't exist")
@@ -24,18 +24,18 @@ def copy_src_to_dst(src, dst):
 
     # List dir
     objects = os.listdir(src)
-    print("objects", objects)
+    # print("objects", objects)
 
     # Copy files or recurse for dirs
     for o in objects:
-        print(f"Checking {o}")
+        # print(f"Checking {o}")
         if os.path.isfile(f"{src}/{o}"):
-            print(f"{o} is file")
-            print(f"Copying {src}/{o} to {dst}")
+            # print(f"{o} is file")
+            # print(f"Copying {src}/{o} to {dst}")
             shutil.copy(f"{src}/{o}", dst)
             continue
         if os.path.isdir(f"{src}/{o}"):
-            print(f"{o} is dir")
+            # print(f"{o} is dir")
             copy_src_to_dst(f"{src}/{o}", f"{dst}/{o}")
             continue
     #     else:
@@ -44,7 +44,7 @@ def copy_src_to_dst(src, dst):
 
 def main():
     copy_src_to_dst("./static/", "./public/")
-    generate_pages_recursive("./content/index.md", "template.html", "./public/index.html")
+    generate_pages_recursive("./content/", "template.html", "./public/")
 
 
 main()

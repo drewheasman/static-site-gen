@@ -85,6 +85,12 @@ def block_to_block_type(markdown_block):
 
     return BlockType.PARAGRAPH
 
+def remove_markdown_regex(block, regex):
+    new_block = ""
+    for line in block.splitlines():
+        new_block += re.sub(regex, "", line) + "\n"
+    return new_block[:-1]
+
 def markdown_to_html_node(markdown):
     nodes = []
 
@@ -93,23 +99,29 @@ def markdown_to_html_node(markdown):
         match block_to_block_type(block):
             case BlockType.HEADING:
                 count = block.count("#")
-                node = LeafNode(f"h{count}", block[2:])
-                nodes.append(node)
+                block = remove_markdown_regex(block, heading_regex)
+                leaves = map(textnode_to_htmlnode, text_to_textnodes(block))
+                nodes.append(ParentNode(f"h{count}", leaves))
             case BlockType.PARAGRAPH:
                 leaves = map(textnode_to_htmlnode, text_to_textnodes(block))
                 nodes.append(ParentNode("p", leaves))
             case BlockType.CODE:
-                code = LeafNode("code", "\n".join(block.split("\n")[1:-1]))
+                block = remove_markdown_regex(block, code_identifier)
+                block = "".join(block.splitlines()[1:])
+                code = LeafNode("code", block)
                 nodes.append(code)
             case BlockType.QUOTE:
-                node = LeafNode("blockquote", block[2:])
+                block = remove_markdown_regex(block, quote_regex)
+                node = LeafNode("blockquote", block)
                 nodes.append(node)
             case BlockType.UNORDERED_LIST:
-                node = "".join(map(lambda l: LeafNode("li", l[2:]).to_html(), block.split("\n")))
+                block = remove_markdown_regex(block, unordered_list_regex)
+                node = "".join(map(lambda l: LeafNode("li", l).to_html(), block.split("\n")))
                 node = map(textnode_to_htmlnode, text_to_textnodes(node))
                 nodes.append(ParentNode("ul", node))
             case BlockType.ORDERED_LIST:
-                node = "".join(map(lambda l: LeafNode("li", re.sub(ordered_list_regex, "", l)).to_html(), block.split("\n")))
+                block = remove_markdown_regex(block, ordered_list_regex)
+                node = "".join(map(lambda l: LeafNode("li", l).to_html(), block.split("\n")))
                 node = map(textnode_to_htmlnode, text_to_textnodes(node))
                 nodes.append(ParentNode("ol", node))
 
