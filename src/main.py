@@ -1,4 +1,6 @@
-import os, shutil
+import os
+import sys
+import shutil
 
 from generate_page import generate_pages_recursive
 
@@ -43,8 +45,11 @@ def copy_src_to_dst(src, dst):
 
 
 def main():
-    copy_src_to_dst("./static/", "./public/")
-    generate_pages_recursive("./content/", "template.html", "./public/")
+    copy_src_to_dst("./static/", "./docs/")
+
+    basepath = "/" if len(sys.argv) <= 1 else sys.argv[1]
+    generate_pages_recursive(basepath, "./content/",
+                             "template.html", "./docs/")
 
 
 main()
